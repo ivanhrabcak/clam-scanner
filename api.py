@@ -15,14 +15,17 @@ async def scan_file():
     
     try:
         clam = clamd.ClamdNetworkSocket()
-        scan_result = clam.instream(file.stream)
+        scan_result = clam.instream(file.stream).get("stream")
         clam._close_socket()
     except ConnectionResetError:
         return response('File too large.'), 400
     except (clamd.ConnectionError, ConnectionError) as e:
         return response(f'{e}'), 500
 
-    return response(scan_result.get('stream')), 200
+    if len(scan_result) != 2:
+        return response("Unexpected response from CLAM's socket."), 500
+    
+    return jsonify({"response": {"result": scan_result[0], "virus": scan_result[1]}})
 
 if __name__ == '__main__':
     app.run('0.0.0.0', 8080, threaded=True)
