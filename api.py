@@ -7,7 +7,7 @@ def response(message):
     return jsonify({'response': message})
 
 @app.route('/scan', methods=['POST'])
-async def scan_file():
+def scan_file():
     file = request.files.get('file')
 
     if file == None:
